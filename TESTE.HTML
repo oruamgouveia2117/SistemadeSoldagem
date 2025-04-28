@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Processos de Soldagem</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 20px;
+            background-color: #e8ecef;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo {
+            display: block;
+            margin: 0 auto 10px auto;
+            max-width: 150px;
+            height: auto;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        nav button {
+            padding: 12px 20px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4a5969;
+            color: #ffffff;
+            transition: background-color 0.3s ease;
+        }
+        nav button:hover {
+            background-color: #3b4856;
+        }
+        nav button.active {
+            background-color: #2c3e50;
+        }
+        .section-content {
+            display: none;
+        }
+        .section-content.active {
+            display: block;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 0.95em;
+            background-color: #f9fafb;
+            transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus {
+            border-color: #2c3e50;
+            outline: none;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button.generate {
+            background-color: #2c3e50;
+            color: #ffffff;
+        }
+        button.generate:hover:not(:disabled) {
+            background-color: #1f2a3c;
+        }
+        button.clear {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+        button.clear:hover:not(:disabled) {
+            background-color: #5a6268;
+        }
+        button.pdf {
+            background-color: #17a2b8;
+            color: #ffffff;
+        }
+        button.pdf:hover:not(:disabled) {
+            background-color: #138496;
+        }
+        button:disabled {
+            background-color: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            background-color: #f9fafb;
+        }
+        .section h2 {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .section h3 {
+            font-size: 1.05em;
+            color: #34495e;
+            margin: 8px 0;
+        }
+        .section p {
+            margin: 3px 0;
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #4a5969;
+        }
+        .section .nested {
+            margin-left: 15px;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 8px 0;
+        }
+        .consumable-highlight {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        #materialDesc {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+        .welding-position img,
+        .welding-symbols img,
+        .weld-imperfections img,
+        .welding-polarity img,
+        .transfer-methods video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin: 10px 0;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.4em;
+            }
+            .container {
+                padding: 15px;
+            }
+            .logo {
+                max-width: 120px;
+            }
+            nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+            nav button {
+                width: 100%;
+                padding: 10px;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            input, select, button {
+                font-size: 0.9em;
+                padding: 8px;
+            }
+            .section h2 {
+                font-size: 1.1em;
+            }
+            .section h3 {
+                font-size: 0.95em;
+            }
+            .section p {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="logo.png" alt="Logo do Sistema de Processos de Soldagem" class="logo">
+        <h1>Sistema de Processos de Soldagem</h1>
+        <nav>
+            <button id="nav-metals" class="active">Metais Base e Consumíveis</button>
+            <button id="nav-positions">Posição de Soldagem</button>
+            <button id="nav-symbols">Simbologia de Soldagem</button>
+            <button id="nav-transfer-methods">Explorar Mais</button>
+            <button id="nav-defects">Defeitos e Soluções</button>
+        </nav>
+<!-- Seção Metais Base e Consumíveis -->
+        <div id="metals-section" class="section-content active">
+            <label for="materialInput">Material Base:</label>
+            <input id="materialInput" list="materialList" placeholder="Digite ou selecione um material..." aria-label="Digite ou selecione o material base">
+            <datalist id="materialList"></datalist>
+            <p id="materialDesc"></p>
+            <label for="process">Processo de Soldagem:</label>
+            <select id="process" aria-label="Selecione o processo de soldagem">
+                <option value="">Selecione um processo...</option>
+                <option value="TIG" title="Tungsten Inert Gas - Soldagem com eletrodo de tungstênio e gás inerte">TIG</option>
+                <option value="MIG" title="Metal Inert Gas - Soldagem com arame contínuo e gás inerte">MIG</option>
+                <option value="MAG" title="Metal Active Gas - Soldagem com arame contínuo e gás ativo">MAG</option>
+                <option value="FCAW" title="Flux-Cored Arc Welding - Soldagem com arame tubular e gás de proteção">FCAW</option>
+                <option value="SMAW" title="Shielded Metal Arc Welding - Soldagem com eletrodo revestido">SMAW</option>
+            </select>
+            <div id="consumableSelection" style="display: none;">
+                <label for="consumableSelect">Consumível:</label>
+                <select id="consumableSelect" aria-label="Selecione o consumível">
+                    <option value="">Selecione um consumível...</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="generate" id="generateBtn" aria-label="Gerar dados de soldagem">Gerar Dados</button>
+                <button class="clear" id="clearBtn" aria-label="Limpar seleções">Limpar</button>
+                <button class="pdf" id="pdfBtn" aria-label="Gerar PDF com resultados">Gerar PDF</button>
+            </div>
+            <div id="results" class="results" role="region" aria-live="polite"></div>
+        </div>
+
+        <!-- Seção Posição de Soldagem -->
+        <div id="positions-section" class="section-content">
+            <h2>Posições de Soldagem</h2>
+            <div class="welding-position">
+                <h3>Solda Chanfro</h3>
+                <img src="Solda Chanfro.jpg" alt="Posições de Solda Chanfro (1G, 2G, 3G, 4G)">
+            </div>
+            <div class="welding-position">
+                <h3>Solda Filete</h3>
+                <img src="Solda Filete.jpg" alt="Posições de Solda Filete (1F, 2F, 3F, 4F)">
+            </div>
+            <div class="welding-position">
+                <h3>Solda em Tubulação</h3>
+                <img src="soldatu01.jpg" alt="Posições de Solda em Tubulação 1">
+                <img src="soldatu02.jpg" alt="Posições de Solda em Tubulação 2">
+            </div>
+        </div>
+
+        <!-- Seção Simbologia de Soldagem -->
+        <div id="symbols-section" class="section-content">
+            <h2>Simbologia de Soldagem</h2>
+            <div class="welding-symbols">
+                <img src="01.jpg" alt="Simbologia de Soldagem 1">
+                <img src="02.jpg" alt="Simbologia de Soldagem 2">
+                <img src="03.jpg" alt="Simbologia de Soldagem 3">
+                <img src="04.jpg" alt="Simbologia de Soldagem 4">
+                <img src="05.jpg" alt="Simbologia de Soldagem 5">
+                <img src="06.jpg" alt="Simbologia de Soldagem 6">
+            </div>
+        </div>
+<!-- Seção Explorar Mais -->
+        <div id="transfer-methods-section" class="section-content">
+            <h2>Métodos de Transferência em Processos de Soldagem a Arco</h2>
+            <p>Na soldagem a arco, o metal de adição (quando usado, como em arames consumíveis) é transferido para a poça de fusão por diferentes métodos, dependendo de parâmetros como corrente, tensão, tipo de gás de proteção e configuração do equipamento. Esses métodos de transferência afetam a estabilidade do arco, a qualidade do cordão, a quantidade de respingos e a aplicabilidade em diferentes materiais e posições. Abaixo, detalhamos os quatro principais métodos de transferência: curto-circuito, globular, spray (pulverização) e pulsado, de forma genérica, aplicável a processos de soldagem a arco que utilizam metal de adição.</p>
+
+            <h3>1. Transferência por Curto-Circuito</h3>
+            <h4>Descrição</h4>
+            <p>Na transferência por curto-circuito, o metal de adição (geralmente um arame) entra em contato físico com a peça, criando um curto-circuito. Esse contato provoca um aumento momentâneo de corrente, que funde a ponta do metal de adição, transferindo pequenas gotas para a poça de fusão. O ciclo de curto-circuito ocorre repetidamente, várias vezes por segundo.</p>
+            <h4>Características</h4>
+            <ul>
+                <li><strong>Corrente e tensão:</strong> Baixas, ajustadas para minimizar o aporte de calor.</li>
+                <li><strong>Gás de proteção:</strong> Pode incluir gases ativos ou inertes, dependendo do processo.</li>
+                <li><strong>Tamanho das gotas:</strong> Pequenas, transferidas por contato direto.</li>
+                <li><strong>Frequência:</strong> Alta, com múltiplos curtos-circuitos por segundo.</li>
+            </ul>
+            <h4>Aplicações</h4>
+            <ul>
+                <li>Soldagem de materiais finos (espessuras de 0,5 a 3 mm).</li>
+                <li>Indicada para todas as posições de soldagem (plana, vertical, sobrecabeça).</li>
+                <li>Usada em aços, alumínio e outras ligas, especialmente em aplicações que exigem baixo aporte de calor.</li>
+            </ul>
+            <h4>Vantagens</h4>
+            <ul>
+                <li>Baixo aporte térmico, reduzindo deformações em materiais finos.</li>
+                <li>Versatilidade para soldagem em posições variadas.</li>
+                <li>Simplicidade, compatível com equipamentos básicos.</li>
+            </ul>
+            <h4>Desvantagens</h4>
+            <ul>
+                <li>Gera respingos moderados, exigindo limpeza pós-solda.</li>
+                <li>Arco menos estável, podendo afetar a uniformidade do cordão.</li>
+                <li>Menor produtividade em materiais espessos.</li>
+            </ul>
+            <div class="transfer-methods">
+                <video controls>
+                    <source src="Curto.mp4" type="video/mp4">
+                    Seu navegador não suporta o elemento de vídeo.
+                </video>
+            </div>
+
+            <h3>2. Transferência Globular</h3>
+            <h4>Descrição</h4>
+            <p>Na transferência globular, gotas de metal fundido, maiores que o diâmetro do metal de adição, formam-se na sua extremidade e são transferidas para a poça de fusão principalmente pela ação da gravidade. A transferência é irregular, e o arco apresenta estabilidade limitada.</p>
+            <h4>Características</h4>
+            <ul>
+                <li><strong>Corrente e tensão:</strong> Intermediárias, adequadas para maior taxa de fusão.</li>
+                <li><strong>Gás de proteção:</strong> Frequentemente gases ativos ou misturas, dependendo do material.</li>
+                <li><strong>Tamanho das gotas:</strong> Grandes, com diâmetro superior ao do metal de adição.</li>
+                <li><strong>Frequência:</strong> Baixa e irregular, com gotas caindo esporadicamente.</li>
+            </ul>
+            <h4>Aplicações</h4>
+            <ul>
+                <li>Soldagem de materiais mais espessos (acima de 3 mm).</li>
+                <li>Usada em posições plana ou horizontal, devido à dependência da gravidade.</li>
+                <li>Comum em aplicações robustas, como estruturas pesadas, onde a estética não é prioritária.</li>
+            </ul>
+            <h4>Vantagens</h4>
+            <ul>
+                <li>Alta taxa de deposição, permitindo soldagem rápida em materiais espessos.</li>
+                <li>Boa penetração em juntas mais largas ou mal preparadas.</li>
+                <li>Compatível com equipamentos de média complexidade.</li>
+            </ul>
+            <h4>Desvantagens</h4>
+            <ul>
+                <li>Produz muitos respingos, aumentando o retrabalho.</li>
+                <li>Limitada a posições plana ou horizontal devido à natureza das gotas.</li>
+                <li>Cordão menos uniforme, com acabamento esteticamente inferior.</li>
+            </ul>
+            <div class="transfer-methods">
+                <video controls>
+                    <source src="Globular.mp4" type="video/mp4">
+                    Seu navegador não suporta o elemento de vídeo.
+                </video>
+            </div>
+
+            <h3>3. Transferência por Spray (Pulverização)</h3>
+            <h4>Descrição</h4>
+            <p>Na transferência por spray, o metal fundido é transferido em forma de gotas muito pequenas, propelidas pelo arco em alta velocidade, semelhante a uma pulverização. Esse método ocorre em condições de alta corrente e tensão, proporcionando um arco estável e contínuo.</p>
+            <h4>Características</h4>
+            <ul>
+                <li><strong>Corrente e tensão:</strong> Altas, para sustentar a formação de gotas pequenas.</li>
+                <li><strong>Gás de proteção:</strong> Geralmente gases inertes ou misturas com alta proporção de gases inertes.</li>
+                <li><strong>Tamanho das gotas:</strong> Muito pequenas, menores que o diâmetro do metal de adição.</li>
+                <li><strong>Frequência:</strong> Contínua, com transferência de centenas de gotas por segundo.</li>
+            </ul>
+            <h4>Aplicações</h4>
+            <ul>
+                <li>Soldagem de materiais espessos (acima de 3 mm).</li>
+                <li>Usada em posição plana, devido à poça de fusão fluida.</li>
+                <li>Ideal para aplicações industriais de alta produtividade, como fabricação de estruturas, tubos ou componentes metálicos.</li>
+            </ul>
+            <h4>Vantagens</h4>
+            <ul>
+                <li>Alta produtividade devido à elevada taxa de deposição.</li>
+                <li>Cordão liso, com excelente acabamento estético.</li>
+                <li>Mínimos respingos, reduzindo a necessidade de limpeza.</li>
+                <li>Arco altamente estável.</li>
+            </ul>
+            <h4>Desvantagens</h4>
+            <ul>
+                <li>Alto aporte de calor, podendo causar deformações em materiais finos.</li>
+                <li>Restrita à posição plana devido à fluidez da poça de fusão.</li>
+                <li>Requer equipamentos mais potentes e gases de proteção de maior custo.</li>
+            </ul>
+            <div class="transfer-methods">
+                <video controls>
+                    <source src="Spray.mp4" type="video/mp4">
+                    Seu navegador não suporta o elemento de vídeo.
+                </video>
+            </div>
+
+            <h3>4. Transferência Pulsada</h3>
+            <h4>Descrição</h4>
+            <p>Na transferência pulsada, a corrente alterna entre picos de alta intensidade (que promovem a transferência de gotas) e períodos de baixa intensidade (que estabilizam o arco). Cada pulso libera uma gota pequena, permitindo controle preciso e alta estabilidade do arco.</p>
+            <h4>Características</h4>
+            <ul>
+                <li><strong>Corrente e tensão:</strong> Controladas eletronicamente, com pulsos ajustáveis.</li>
+                <li><strong>Gás de proteção:</strong> Misturas com alta proporção de gases inertes, para maior estabilidade.</li>
+                <li><strong>Tamanho das gotas:</strong> Pequenas, com transferência controlada (uma gota por pulso).</li>
+                <li><strong>Frequência:</strong> Ajustável, geralmente entre 50 e 200 pulsos por segundo.</li>
+            </ul>
+            <h4>Aplicações</h4>
+            <ul>
+                <li>Soldagem de materiais finos e espessos, em todas as posições.</li>
+                <li>Usada em ligas especiais, como alumínio, aço inoxidável e titânio.</li>
+                <li>Comum em indústrias que exigem alta qualidade, como automotiva, aeroespacial e fabricação de equipamentos.</li>
+            </ul>
+            <h4>Vantagens</h4>
+            <ul>
+                <li>Baixo aporte de calor, ideal para materiais sensíveis a deformações.</li>
+                <li>Mínimos respingos, resultando em cordões limpos e uniformes.</li>
+                <li>Alta versatilidade, aplicável a diversas posições e materiais.</li>
+                <li>Excelente controle do cordão e acabamento estético.</li>
+            </ul>
+            <h4>Desvantagens</h4>
+            <ul>
+                <li>Requer equipamentos avançados com controle eletrônico.</li>
+                <li>Maior custo operacional devido a equipamentos e gases.</li>
+                <li>Demanda maior qualificação para ajuste dos parâmetros.</li>
+            </ul>
+            <div class="transfer-methods">
+                <video controls>
+                    <source src="Pulsado.mp4" type="video/mp4">
+                    Seu navegador não suporta o elemento de vídeo.
+                </video>
+            </div>
+
+            <h3>Considerações Finais</h3>
+            <p>Os métodos de transferência em soldagem a arco são selecionados com base no material, espessura, posição da solda, requisitos de qualidade e equipamento disponível. O curto-circuito é ideal para versatilidade, o globular para aplicações robustas, o spray para alta produtividade e o pulsado para precisão e estética. Ajustes precisos de corrente, tensão, velocidade de alimentação do metal de adição e escolha do gás de proteção são essenciais para otimizar o desempenho de cada método.</p>
+<h2>Sopro Magnético</h2>
+            <p>O sopro magnético (ou arc blow, em inglês) é um fenômeno que ocorre durante a soldagem por arco elétrico, como no processo SMAW (eletrodo revestido), MIG/MAG ou TIG, onde o arco elétrico é desviado de sua trajetória ideal devido à interação de campos magnéticos gerados pela corrente elétrica. Esse desvio pode comprometer a qualidade da solda, causando instabilidade no arco, respingos excessivos, falta de fusão ou cordões irregulares.</p>
+            <h3>Causas do Sopro Magnético</h3>
+            <p>O sopro magnético é causado pelo campo magnético gerado pela corrente elétrica que flui pelo eletrodo, peça de trabalho e cabos de soldagem. Esse campo interage com o arco elétrico, que é um condutor de plasma, desviando-o. As principais causas incluem:</p>
+            <ol>
+                <li><strong>Corrente contínua (CC):</strong> O sopro magnético é mais comum em soldagem com corrente contínua, especialmente em alta amperagem, devido ao campo magnético constante gerado. Em corrente alternada (CA), o campo magnético oscila, reduzindo o efeito.</li>
+                <li><strong>Geometria da peça:</strong> Peças com formatos complexos, bordas ou extremidades podem concentrar o fluxo magnético, desviando o arco, especialmente em cantos ou próximo às extremidades da peça.</li>
+                <li><strong>Posicionamento dos cabos de soldagem:</strong> Cabos mal posicionados ou enrolados podem intensificar o campo magnético ao redor da área de soldagem.</li>
+                <li><strong>Material ferromagnético:</strong> Aços carbono e ligas ferromagnéticas podem reter magnetismo residual, que interage com o arco, agravando o sopro.</li>
+                <li><strong>Polaridade:</strong> A polaridade (CC+ ou CC-) influencia a direção do sopro. Por exemplo, em CC+, o arco pode ser desviado para a frente ou para trás, dependendo da configuração.</li>
+                <li><strong>Conexão do cabo terra:</strong> Um ponto de aterramento mal posicionado pode criar caminhos assimétricos para a corrente, gerando campos magnéticos desbalanceados.</li>
+            </ol>
+            <h3>Tipos de Sopro Magnético</h3>
+            <ul>
+                <li><strong>Sopro frontal:</strong> O arco é desviado na direção do avanço da solda.</li>
+                <li><strong>Sopro traseiro:</strong> O arco é desviado para trás, na direção oposta ao avanço.</li>
+                <li><strong>Sopro lateral:</strong> O arco é desviado para os lados, geralmente devido a campos magnéticos assimétricos.</li>
+            </ul>
+            <h3>Efeitos na Soldagem</h3>
+            <p>O sopro magnético pode causar:</p>
+            <ul>
+                <li><strong>Instabilidade do arco:</strong> Dificulta o controle do cordão de solda.</li>
+                <li><strong>Respingos excessivos:</strong> Gotas de metal são projetadas para fora da poça de fusão.</li>
+                <li><strong>Falta de fusão ou penetração inadequada:</strong> O desvio do arco impede a fusão uniforme.</li>
+                <li><strong>Cordões irregulares:</strong> A estética e a integridade da solda são comprometidas.</li>
+                <li><strong>Aumento do desgaste do eletrodo:</strong> Em SMAW, o sopro pode acelerar o consumo do eletrodo.</li>
+            </ul>
+            <h3>Como Minimizar ou Evitar o Sopro Magnético</h3>
+            <p>Existem várias estratégias para reduzir o impacto do sopro magnético:</p>
+            <ol>
+                <li><strong>Usar corrente alternada (CA):</strong> A CA reduz o sopro magnético, pois o campo magnético oscila, neutralizando o desvio do arco. Eletrodos como o E7018 são compatíveis com CA, enquanto o E6010 é geralmente usado com CC.</li>
+                <li><strong>Ajustar a posição do cabo terra:</strong>
+                    <ul>
+                        <li>Posicione o cabo terra o mais próximo possível da área de soldagem.</li>
+                        <li>Evite que o cabo terra esteja muito distante ou em ângulos que criem campos magnéticos assimétricos.</li>
+                    </ul>
+                </li>
+                <li><strong>Reduzir a amperagem:</strong> Diminuir a corrente reduz a intensidade do campo magnético, embora isso possa limitar a penetração.</li>
+                <li><strong>Ajustar o ângulo do eletrodo:</strong> Modificar o ângulo do eletrodo (geralmente inclinado em direção ao sopro) pode compensar o desvio do arco.</li>
+                <li><strong>Desmagnetizar a peça:</strong> Use desmagnetizadores para eliminar o magnetismo residual em aços ferromagnéticos antes da soldagem.</li>
+                <li><strong>Distribuir o campo magnético:</strong>
+                    <ul>
+                        <li>Posicione os cabos de soldagem de forma simétrica e evite enrolá-los.</li>
+                        <li>Use múltiplos pontos de aterramento em peças grandes para equilibrar o fluxo de corrente.</li>
+                    </ul>
+                </li>
+                <li><strong>Soldar em direção ao sopro:</strong> Se o sopro for inevitável, ajuste a direção da soldagem para que o desvio do arco seja menos prejudicial.</li>
+                <li><strong>Usar eletrodos adequados:</strong> Alguns eletrodos, como o E7018, produzem um arco mais estável, sendo menos suscetíveis ao sopro magnético em comparação ao E6010, que tem um arco mais agressivo.</li>
+                <li><strong>Pré-aquecer a peça:</strong> Em alguns casos, o pré-aquecimento pode reduzir o magnetismo residual.</li>
+            </ol>
+            <p>O sopro magnético é um desafio comum na soldagem por arco elétrico, especialmente com corrente contínua e em materiais ferromagnéticos. Ele resulta da interação do campo magnético com o arco, causando desvios que afetam a qualidade da solda. Estratégias como usar CA, ajustar o aterramento, reduzir a corrente e desmagnetizar a peça podem minimizar o problema.</p>
+            <div class="transfer-methods">
+                <video controls>
+                    <source src="Sopro.mp4" type="video/mp4">
+                    Seu navegador não suporta o elemento de vídeo.
+                </video>
+            </div>
+<h2>Polaridade nos Processos de Soldagem</h2>
+            <p>A polaridade na soldagem a arco elétrico refere-se à direção do fluxo de corrente elétrica entre o eletrodo e a peça de trabalho. Existem dois tipos principais: polaridade direta (DCEN - Direct Current Electrode Negative, ou corrente contínua com eletrodo negativo) e polaridade inversa (DCEP - Direct Current Electrode Positive, ou corrente contínua com eletrodo positivo). Além disso, alguns processos podem usar corrente alternada (CA). A escolha da polaridade afeta diretamente a penetração, a estabilidade do arco, a taxa de deposição e a qualidade da solda, sendo determinada pelas características do processo e do material a ser soldado. Abaixo, detalhamos a polaridade para cada processo abordado.</p>
+
+            <h3>1. SMAW (Shielded Metal Arc Welding - Soldagem com Eletrodo Revestido)</h3>
+            <p><strong>Polaridade Usada:</strong> Predominantemente polaridade inversa (DCEP), mas alguns eletrodos podem usar polaridade direta (DCEN) ou corrente alternada (CA).</p>
+            <p><strong>Motivo:</strong></p>
+            <ul>
+                <li><strong>DCEP (Eletrodo Positivo):</strong> É a polaridade mais comum para SMAW, especialmente com eletrodos como o E7018. Nesse caso, o eletrodo é o polo positivo e a peça é o polo negativo. A polaridade inversa gera maior aporte de calor na peça cerca de 70% no metal base e 30% no eletrodo, resultando em maior penetração e um cordão de solda mais profundo. Isso é ideal para soldar materiais mais espessos e garantir uma boa fusão. Além disso, o fluxo de elétrons do negativo (peça) para o positivo (eletrodo) ajuda na remoção de óxidos da superfície da peça, melhorando a limpeza da solda.</li>
+            </ul>
+            <div class="welding-polarity">
+                <img src="smaw.jpg" alt="Polaridade SMAW - DCEP">
+            </div>
+            <ul>
+                <li><strong>DCEN (Eletrodo Negativo):</strong> Usada com eletrodos como o E6010, que são projetados para alta penetração e soldagem de raiz. Nesse caso, o eletrodo é o polo negativo e a peça é o polo positivo, concentrando mais calor no eletrodo 70% no eletrodo e 30% no metal base. Isso aumenta a taxa de fusão do eletrodo e a deposição, mas reduz a penetração na peça, sendo útil para soldas em materiais finos ou em passes de raiz onde a penetração excessiva pode causar queima através do material.</li>
+                <li><strong>CA (Corrente Alternada):</strong> Alguns eletrodos, como o E7018, podem ser usados com CA para reduzir o sopro magnético (arc blow), especialmente em soldagens de peças grandes ou em locais com magnetismo residual. A CA alterna a polaridade, distribuindo o calor de forma mais uniforme entre o eletrodo e a peça, o que ajuda a estabilizar o arco em situações desafiadoras.</li>
+            </ul>
+
+            <h3>2. MIG (Gas Metal Arc Welding - Soldagem com Arco Metálico e Gás Inerte)</h3>
+            <p><strong>Polaridade Usada:</strong> Quase exclusivamente polaridade inversa (DCEP).</p>
+            <p><strong>Motivo:</strong></p>
+            <ul>
+                <li><strong>DCEP (Eletrodo Positivo):</strong> No processo MIG, o arame (eletrodo consumível) é o polo positivo e a peça é o polo negativo. Essa configuração é ideal porque concentra maior calor na peça, proporcionando boa penetração e fusão. O fluxo de elétrons da peça para o arame também ajuda a limpar óxidos da superfície da peça, o que é essencial para soldar materiais como alumínio, que frequentemente utiliza MIG com gás inerte (como argônio). Além disso, a polaridade inversa promove uma transferência de metal mais estável (como spray ou pulsada), reduzindo respingos e melhorando a qualidade do cordão.</li>
+            </ul>
+            <div class="welding-polarity">
+                <img src="GMAW.jpg" alt="Polaridade MIG - DCEP">
+            </div>
+            <ul>
+                <li><strong>DCEN e CA:</strong> Raramente usadas no MIG, pois a polaridade direta (DCEN) aumenta a deposição no eletrodo, mas reduz drasticamente a penetração, tornando o processo instável para a maioria das aplicações. A corrente alternada (CA) não é prática para MIG devido à necessidade de um arco estável e contínuo, que é mais difícil de manter com CA.</li>
+            </ul>
+
+<h3>3. MAG (Gas Metal Arc Welding - Soldagem com Arco Metálico e Gás Ativo)</h3>
+            <p><strong>Polaridade Usada:</strong> Predominantemente polaridade inversa (DCEP).</p>
+            <p><strong>Motivo:</strong></p>
+            <ul>
+                <li><strong>DCEP (Eletrodo Positivo):</strong> Assim como no MIG, o MAG utiliza polaridade inversa para garantir maior penetração e estabilidade do arco. O arame é o polo positivo e a peça é o polo negativo. O MAG utiliza gases ativos (como CO₂ ou misturas de CO₂ com argônio), que reagem com o arco e a poça de fusão, e a polaridade inversa ajuda a controlar a transferência de metal, especialmente em modos como curto-circuito ou globular, que são comuns no MAG. A maior concentração de calor na peça facilita a fusão de aços carbono e de baixa liga, que são os materiais mais comuns nesse processo.</li>
+            </ul>
+            <div class="welding-polarity">
+                <img src="GMA W.jpg" alt="Polaridade MAG - DCEP">
+            </div>
+            <ul>
+                <li><strong>DCEN e CA:</strong> Não são usadas no MAG pelas mesmas razões do MIG. A polaridade direta (DCEN) reduz a penetração e aumenta os respingos, enquanto a CA torna o arco instável, dificultando o controle da solda.</li>
+            </ul>
+
+            <h3>4. TIG (Gas Tungsten Arc Welding - Soldagem com Arco de Tungstênio e Gás Inerte)</h3>
+            <p><strong>Polaridade Usada:</strong> Geralmente polaridade direta (DCEN) para aços e ligas metálicas, e corrente alternada (CA) para alumínio e magnésio.</p>
+            <p><strong>Motivo:</strong></p>
+            <ul>
+                <li><strong>DCEN (Eletrodo Negativo):</strong> No TIG, o eletrodo de tungstênio é o polo negativo e a peça é o polo positivo. Essa configuração concentra cerca de 2/3 do calor na peça, promovendo boa penetração e fusão, enquanto mantém o eletrodo de tungstênio mais frio, evitando sua degradação. É ideal para soldar aços carbono, aços inoxidáveis, titânio e outras ligas metálicas, onde o controle preciso do arco e a penetração são essenciais.</li>
+            </ul>
+            <div class="welding-polarity">
+                <img src="GTAW.jpg" alt="Polaridade TIG - DCEN">
+            </div>
+            <ul>
+                <li><strong>CA (Corrente Alternada):</strong> Usada para soldar alumínio e magnésio devido à necessidade de limpeza da camada de óxido presente nesses materiais. A corrente alternada alterna entre DCEP e DCEN: na fase DCEP (eletrodo positivo), os elétrons fluem da peça para o eletrodo, quebrando a camada de óxido (efeito de limpeza catódica); na fase DCEN (eletrodo negativo), o calor se concentra na peça, promovendo penetração. Essa alternância garante uma solda limpa e de alta qualidade em materiais como alumínio.</li>
+                <li><strong>DCEP (Eletrodo Positivo):</strong> Raramente usada no TIG, pois concentra muito calor no eletrodo de tungstênio, podendo superaquecê-lo e causar sua deterioração.</li>
+            </ul>
+
+            <h3>5. FCAW (Flux-Cored Arc Welding - Soldagem com Arco de Arame Tubular)</h3>
+            <p><strong>Polaridade Usada:</strong> Depende do tipo de arame e do gás de proteção: polaridade inversa (DCEP) para FCAW com gás de proteção (FCAW-G), e polaridade direta (DCEN) para FCAW sem gás (FCAW-S, autoprotegido).</p>
+            <p><strong>Motivo:</strong></p>
+            <ul>
+                <li><strong>DCEP (Eletrodo Positivo):</strong> No FCAW-G (com gás de proteção, como CO₂ ou misturas), a polaridade inversa é usada porque o arame tubular é o polo positivo e a peça é o polo negativo. Isso concentra o calor na peça, proporcionando boa penetração e estabilidade do arco, semelhante ao MIG/MAG. É ideal para soldar aços carbono e de baixa liga em aplicações estruturais, onde a penetração e a resistência do cordão são prioritárias.</li>
+                <li><strong>DCEN (Eletrodo Negativo):</strong> No FCAW-S (autoprotegido, sem gás externo), a polaridade direta é frequentemente usada. O arame é o polo negativo e a peça é o polo positivo, concentrando mais calor no arame. Isso aumenta a taxa de fusão do arame e a deposição, o que é vantajoso para soldagem em campo (onde o uso de gás é impraticável) e para passes rápidos em materiais mais finos. O fluxo dentro do arame gera proteção suficiente, e a menor penetração evita queima através de materiais mais finos.</li>
+                <li><strong>CA (Corrente Alternada):</strong> Raramente usada no FCAW, pois a estabilidade do arco é mais difícil de manter, especialmente em arames autoprotegidos.</li>
+            </ul>
+        </div>
+
+        <!-- Seção Defeitos e Soluções -->
+        <div id="defects-section" class="section-content">
+            <h2>Defeitos na Soldagem</h2>
+            <p>Os defeitos na soldagem são imperfeições que podem comprometer a integridade estrutural, a estética e a funcionalidade da solda. Eles podem ser causados por diversos fatores, como parâmetros inadequados, contaminação, ou falta de controle durante o processo de soldagem. A seguir, apresentamos alguns dos defeitos mais comuns, ilustrados com imagens para facilitar a identificação, suas causas e soluções.</p>
+            <div class="weld-imperfections">
+                <img src="d01.jpg" alt="Defeito de Soldagem 1">
+                <img src="d02.jpg" alt="Defeito de Soldagem 2">
+                <img src="d03.jpg" alt="Defeito de Soldagem 3">
+                <img src="d04.jpg" alt="Defeito de Soldagem 4">
+                <img src="d05.jpg" alt="Defeito de Soldagem 5">
+            </div>
+
+            <h3>1. Porosidade</h3>
+            <h4>Descrição</h4>
+            <p>Cavidades no cordão de solda causadas por gases aprisionados durante a solidificação.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Eletrodo úmido</li>
+                <li>Revestimento danificado</li>
+                <li>Contaminação do metal base (óleo, graxa, ferrugem)</li>
+                <li>Corrente inadequada</li>
+                <li>Arco longo</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Fluxo de gás de proteção insuficiente</li>
+                <li>Contaminação do eletrodo de tungstênio</li>
+                <li>Metal base sujo</li>
+                <li>Vazamentos na tocha</li>
+                <li>Gás impuro</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Fluxo de gás de proteção baixo</li>
+                <li>Bico da pistola obstruído</li>
+                <li>Arame contaminado</li>
+                <li>Velocidade de soldagem alta</li>
+                <li>Vento ou correntes de ar</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Fluxo de gás insuficiente (FCAW-G)</li>
+                <li>Contaminação do arame tubular</li>
+                <li>Umidade no fluxo</li>
+                <li>Técnica inadequada</li>
+                <li>Bico da pistola sujo</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Ressecar eletrodos (ex.: 200-350°C por 1-2h para E6013/E7018)</li>
+                <li>Armazenar eletrodos em estufa a 120°C</li>
+                <li>Limpar metal base com escova de aço inoxidável ou solvente</li>
+                <li>Ajustar corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Manter arco curto (1-2mm)</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Aumentar fluxo de gás (ex.: 10-20 L/min de argônio)</li>
+                <li>Usar gás puro (99,99% argônio ou hélio)</li>
+                <li>Limpar eletrodo de tungstênio com lixa ou esmeril dedicado</li>
+                <li>Desengraxar metal base com acetona</li>
+                <li>Inspecionar tocha por vazamentos</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Ajustar fluxo de gás (ex.: 15-25 L/min para CO₂/argônio)</li>
+                <li>Limpar bico da pistola com escova ou spray anti-respingo</li>
+                <li>Usar arame limpo, armazenado em local seco</li>
+                <li>Reduzir velocidade de soldagem (ex.: 200-300 mm/min)</li>
+                <li>Proteger área de soldagem contra vento</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar fluxo de gás (FCAW-G, ex.: 20-30 L/min)</li>
+                <li>Armazenar arame em local seco (50-70% UR)</li>
+                <li>Limpar metal base com escova ou solvente</li>
+                <li>Manter ângulo da pistola (10-15° de arraste)</li>
+                <li>Limpar bico regularmente</li>
+            </ul>
+
+            <h3>2. Falta de Fusão</h3>
+            <h4>Descrição</h4>
+            <p>Falta de união completa entre o metal de solda e o metal base ou passes anteriores.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente baixa</li>
+                <li>Velocidade de soldagem alta</li>
+                <li>Ângulo de eletrodo incorreto</li>
+                <li>Junta mal preparada</li>
+                <li>Eletrodo desgastado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Corrente insuficiente</li>
+                <li>Tocha mal posicionada</li>
+                <li>Metal base frio</li>
+                <li>Falta de metal de adição</li>
+                <li>Tungstênio contaminado</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão baixa</li>
+                <li>Velocidade de alimentação do arame inadequada</li>
+                <li>Distância do bico à peça grande</li>
+                <li>Contaminação do arame</li>
+                <li>Bico desgastado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Tensão/corrente baixa</li>
+                <li>Técnica inadequada</li>
+                <li>Junta suja</li>
+                <li>Umidade no fluxo</li>
+                <li>Alimentação irregular do arame</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Aumentar corrente (ex.: 110-150A para 3.2mm E7018)</li>
+                <li>Reduzir velocidade de soldagem (ex.: 150-250 mm/min)</li>
+                <li>Manter ângulo de 10-20°</li>
+                <li>Preparar junta com chanfro em V ou U</li>
+                <li>Usar eletrodo novo e adequado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Aumentar corrente (ex.: 100-150A para 2mm de aço)</li>
+                <li>Posicionar tocha a 70-80°</li>
+                <li>Pré-aquecer metal base (ex.: 100-150°C para SAE 4140)</li>
+                <li>Adicionar metal de adição compatível</li>
+                <li>Limpar ou substituir tungstênio contaminado</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Aumentar tensão (ex.: 22-26V para arame 1.2mm)</li>
+                <li>Ajustar alimentação do arame (ex.: 5-7 m/min)</li>
+                <li>Manter distância do bico de 10-15mm</li>
+                <li>Limpar metal base com solvente</li>
+                <li>Substituir bico desgastado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 24-28V, 150-200A)</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Limpar junta com escova de aço</li>
+                <li>Ressecar arame tubular</li>
+                <li>Verificar alimentador de arame</li>
+            </ul>
+<h3>3. Inclusão de Escória</h3>
+            <h4>Descrição</h4>
+            <p>Material não metálico (escória) aprisionado no cordão de solda, enfraquecendo a junta.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Remoção incompleta de escória entre passes</li>
+                <li>Ângulo de eletrodo inadequado</li>
+                <li>Corrente baixa</li>
+                <li>Velocidade de soldagem alta</li>
+                <li>Eletrodo com revestimento danificado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Técnica inadequada</li>
+                <li>Tensão baixa</li>
+                <li>Escória não removida entre passes</li>
+                <li>Contaminação do arame</li>
+                <li>Fluxo úmido</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Remover escória com escova de aço ou picador após cada passe</li>
+                <li>Manter ângulo de 10-20°</li>
+                <li>Aumentar corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Reduzir velocidade de soldagem (ex.: 150-250 mm/min)</li>
+                <li>Usar eletrodo com revestimento intacto</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Usar técnica de arraste (ângulo de 10-15°)</li>
+                <li>Ajustar tensão (ex.: 24-28V para 1.6mm)</li>
+                <li>Remover escória entre passes com escova</li>
+                <li>Usar arame limpo e seco</li>
+                <li>Ressecar arame tubular (ex.: 200°C por 1h)</li>
+            </ul>
+
+            <h3>4. Trinca a Quente</h3>
+            <h4>Descrição</h4>
+            <p>Fraturas no cordão ou ZTA durante a solidificação, causadas por tensões térmicas e impurezas.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Alta restrição da junta</li>
+                <li>Eletrodo com alto teor de enxofre/fósforo</li>
+                <li>Resfriamento rápido</li>
+                <li>Geometria inadequada da junta</li>
+                <li>Corrente muito alta</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Resfriamento rápido</li>
+                <li>Contaminação do metal de adição</li>
+                <li>Junta com alta restrição</li>
+                <li>Falta de controle de temperatura</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Composição química inadequada do arame</li>
+                <li>Resfriamento rápido</li>
+                <li>Junta mal projetada</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Fluxo contaminado</li>
+                <li>Alta restrição da junta</li>
+                <li>Parâmetros incorretos</li>
+                <li>Resfriamento rápido</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Usar eletrodos de baixa hidrogênio (ex.: E7018)</li>
+                <li>Pré-aquecer (ex.: 150-200°C para SAE 4140)</li>
+                <li>Projetar juntas com chanfro em V ou U para reduzir restrição</li>
+                <li>Controlar resfriamento com mantas térmicas</li>
+                <li>Ajustar corrente (ex.: 110-150A para 3.2mm)</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Pré-aquecer metal base (ex.: 100-150°C)</li>
+                <li>Usar metal de adição puro (ex.: ER70S-2)</li>
+                <li>Reduzir restrição da junta com projeto adequado</li>
+                <li>Controlar temperatura interpassos (máx. 150°C)</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 150-200A)</li>
+                <li>Usar arame com composição adequada (ex.: ER70S-6)</li>
+                <li>Pré-aquecer (ex.: 100-150°C)</li>
+                <li>Projetar juntas com menor restrição</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Usar arame tubular limpo e seco</li>
+                <li>Pré-aquecer (ex.: 100-150°C)</li>
+                <li>Ajustar parâmetros (ex.: 24-28V, 150-200A)</li>
+                <li>Reduzir restrição da junta</li>
+            </ul>
+
+            <h3>5. Trinca a Frio</h3>
+            <h4>Descrição</h4>
+            <p>Fraturas no cordão ou ZTA após a soldagem, causadas por hidrogênio difusível e alta dureza.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Eletrodo úmido</li>
+                <li>Falta de pré-aquecimento</li>
+                <li>Alta dureza na ZTA</li>
+                <li>Aços de alta resistência (ex.: SAE 4140)</li>
+                <li>Resfriamento rápido</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Contaminação por hidrogênio</li>
+                <li>Falta de pré-aquecimento</li>
+                <li>Aços de alta resistência</li>
+                <li>Metal de adição inadequado</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Arame contaminado</li>
+                <li>Falta de pré-aquecimento</li>
+                <li>Tensão/corrente inadequada</li>
+                <li>Aços de alta resistência</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Arame úmido</li>
+                <li>Falta de pré-aquecimento</li>
+                <li>Alta restrição da junta</li>
+                <li>Fluxo contaminado</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Ressecar eletrodos (ex.: 300-350°C por 2h para E7018)</li>
+                <li>Pré-aquecer (ex.: 150-200°C para SAE 4140)</li>
+                <li>Usar pós-aquecimento (ex.: 200°C por 1h)</li>
+                <li>Selecionar eletrodos de baixa hidrogênio (ex.: E8018-C3)</li>
+                <li>Controlar resfriamento com mantas térmicas</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Usar gás de proteção puro (ex.: argônio 99,99%)</li>
+                <li>Pré-aquecer (ex.: 100-150°C)</li>
+                <li>Limpar metal base e vareta de adição</li>
+                <li>Usar metal de adição compatível (ex.: ER80S-Ni1)</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Armazenar arame em local seco (50-70% UR)</li>
+                <li>Pré-aquecer (ex.: 100-150°C)</li>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 150-200A)</li>
+                <li>Usar arame limpo (ex.: ER70S-6)</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ressecar arame tubular (ex.: 200°C por 1h)</li>
+                <li>Pré-aquecer (ex.: 100-150°C)</li>
+                <li>Usar pós-aquecimento (ex.: 200°C por 1h)</li>
+                <li>Verificar qualidade do fluxo</li>
+            </ul>
+
+            <h3>6. Mordedura</h3>
+            <h4>Descrição</h4>
+            <p>Sulco na borda do cordão que enfraquece a junta devido a fusão excessiva do metal base.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Ângulo de eletrodo incorreto</li>
+                <li>Arco longo</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Tocha mal posicionada</li>
+                <li>Falta de controle do arco</li>
+                <li>Excesso de calor</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Distância do bico à peça pequena</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Bico desgastado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Técnica inadequada</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Bico da pistola sujo</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Aumentar velocidade de soldagem (ex.: 200-300 mm/min)</li>
+                <li>Manter ângulo de 10-20°</li>
+                <li>Usar arco curto (1-2mm)</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 80-120A para 2mm de aço)</li>
+                <li>Posicionar tocha a 70-80°</li>
+                <li>Controlar arco com precisão</li>
+                <li>Reduzir tempo de exposição ao calor</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Reduzir tensão/corrente (ex.: 20-24V, 120-180A)</li>
+                <li>Manter distância do bico de 10-15mm</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Substituir bico desgastado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Limpar bico da pistola</li>
+            </ul>
+<h3>7. Penetração Incompleta</h3>
+            <h4>Descrição</h4>
+            <p>Falta de fusão até a raiz da junta, comprometendo a resistência estrutural.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente baixa</li>
+                <li>Junta mal preparada (ex.: chanfro insuficiente)</li>
+                <li>Velocidade de soldagem alta</li>
+                <li>Eletrodo inadequado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Corrente insuficiente</li>
+                <li>Falta de metal de adição</li>
+                <li>Junta inadequada</li>
+                <li>Tocha mal posicionada</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente baixa</li>
+                <li>Distância do bico à peça grande</li>
+                <li>Velocidade de alimentação do arame baixa</li>
+                <li>Junta suja</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Parâmetros incorretos</li>
+                <li>Junta suja</li>
+                <li>Técnica inadequada</li>
+                <li>Alimentação irregular do arame</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Aumentar corrente (ex.: 110-150A para 3.2mm E7018)</li>
+                <li>Preparar junta com chanfro em V ou U (ex.: 60° para 10mm)</li>
+                <li>Reduzir velocidade de soldagem (ex.: 150-250 mm/min)</li>
+                <li>Usar eletrodo adequado (ex.: E7018 para aços de alta resistência)</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Aumentar corrente (ex.: 100-150A para 2mm de aço)</li>
+                <li>Adicionar metal de adição compatível (ex.: ER70S-2)</li>
+                <li>Usar chanfro em V ou U</li>
+                <li>Posicionar tocha a 70-80°</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Aumentar tensão/corrente (ex.: 24-28V, 150-200A)</li>
+                <li>Manter distância do bico de 10-15mm</li>
+                <li>Ajustar alimentação do arame (ex.: 5-7 m/min)</li>
+                <li>Limpar junta com escova de aço</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 24-28V, 150-200A)</li>
+                <li>Limpar junta com solvente</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Verificar alimentador de arame</li>
+            </ul>
+
+            <h3>8. Excesso de Reforço</h3>
+            <h4>Descrição</h4>
+            <p>Depósito excessivo de metal de solda, aumentando custos e podendo causar tensões.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Eletrodo grande demais</li>
+                <li>Técnica de oscilação inadequada</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Excesso de metal de adição</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Corrente alta</li>
+                <li>Falta de controle da poça</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Velocidade de alimentação do arame alta</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Bico mal posicionado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Parâmetros incorretos</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Técnica inadequada</li>
+                <li>Alimentação excessiva do arame</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Aumentar velocidade de soldagem (ex.: 200-300 mm/min)</li>
+                <li>Usar eletrodo de diâmetro menor (ex.: 2.5mm para chapas finas)</li>
+                <li>Ajustar oscilação para cordão uniforme</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Reduzir quantidade de metal de adição</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Reduzir corrente (ex.: 80-120A para 2mm)</li>
+                <li>Controlar poça com precisão</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Reduzir tensão/corrente (ex.: 20-24V, 120-180A)</li>
+                <li>Ajustar alimentação do arame (ex.: 4-6 m/min)</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Posicionar bico a 10-15mm</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Reduzir alimentação do arame</li>
+            </ul>
+
+            <h3>9. Distorção</h3>
+            <h4>Descrição</h4>
+            <p>Deformação do metal base devido a tensões térmicas durante a soldagem.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Aporte térmico elevado</li>
+                <li>Sequência de soldagem inadequada</li>
+                <li>Junta com alta restrição</li>
+                <li>Falta de fixação da peça</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Soldagem contínua sem pausas</li>
+                <li>Falta de controle de temperatura</li>
+                <li>Peça mal fixada</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Velocidade de soldagem baixa</li>
+                <li>Falta de fixação</li>
+                <li>Sequência inadequada</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Parâmetros incorretos</li>
+                <li>Aporte térmico elevado</li>
+                <li>Falta de fixação</li>
+                <li>Junta mal projetada</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Usar sequência alternada de passes (ex.: soldar lados opostos)</li>
+                <li>Fixar peça com grampos ou gabaritos</li>
+                <li>Pré-aquecer uniformemente (ex.: 100-150°C)</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 80-120A para 2mm)</li>
+                <li>Fazer pausas para controle de temperatura</li>
+                <li>Usar fixação rígida</li>
+                <li>Controlar temperatura interpassos (máx. 150°C)</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Reduzir tensão/corrente (ex.: 20-24V, 120-180A)</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Fixar peça com grampos</li>
+                <li>Usar sequência alternada</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Aumentar velocidade de soldagem</li>
+                <li>Fixar peça adequadamente</li>
+                <li>Projetar junta com menor restrição</li>
+            </ul>
+<h3>10. Respingos Excessivos</h3>
+            <h4>Descrição</h4>
+            <p>Gotas de metal fundido projetadas fora do cordão, dificultando limpeza e estética.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Arco longo</li>
+                <li>Eletrodo úmido</li>
+                <li>Revestimento danificado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Tungstênio contaminado</li>
+                <li>Gás de proteção insuficiente</li>
+                <li>Tocha mal posicionada</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Transferência de metal inadequada (ex.: globular em vez de spray)</li>
+                <li>Distância do bico à peça grande</li>
+                <li>Arame contaminado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Técnica inadequada</li>
+                <li>Fluxo de gás insuficiente (FCAW-G)</li>
+                <li>Arame úmido</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Manter arco curto (1-2mm)</li>
+                <li>Ressecar eletrodos (ex.: 200-350°C por 1-2h)</li>
+                <li>Usar eletrodo com revestimento intacto</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 80-120A para 2mm)</li>
+                <li>Limpar ou substituir tungstênio</li>
+                <li>Aumentar fluxo de gás (ex.: 10-20 L/min)</li>
+                <li>Posicionar tocha a 70-80°</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente para transferência spray (ex.: 24-28V, 180-220A)</li>
+                <li>Manter distância do bico de 10-15mm</li>
+                <li>Usar arame limpo</li>
+                <li>Aplicar spray anti-respingo</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Aumentar fluxo de gás (FCAW-G, ex.: 20-30 L/min)</li>
+                <li>Ressecar arame tubular</li>
+            </ul>
+
+            <h3>11. Instabilidade do Arco</h3>
+            <h4>Descrição</h4>
+            <p>Flutuações ou interrupções no arco elétrico, resultando em cordão irregular.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente inadequada</li>
+                <li>Arco longo</li>
+                <li>Eletrodo úmido</li>
+                <li>Fonte de soldagem com falha</li>
+                <li>Cabo de soldagem danificado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Tungstênio contaminado</li>
+                <li>Gás de proteção insuficiente</li>
+                <li>Corrente instável</li>
+                <li>Tocha com vazamentos</li>
+                <li>Fonte de soldagem defeituosa</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente inadequada</li>
+                <li>Alimentação irregular do arame</li>
+                <li>Bico da pistola sujo</li>
+                <li>Cabo de alimentação danificado</li>
+                <li>Fonte de soldagem instável</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Parâmetros incorretos</li>
+                <li>Alimentação irregular do arame</li>
+                <li>Fluxo de gás insuficiente (FCAW-G)</li>
+                <li>Bico da pistola obstruído</li>
+                <li>Fonte de soldagem com falha</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Ajustar corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Manter arco curto (1-2mm)</li>
+                <li>Ressecar eletrodos (ex.: 200-350°C por 1-2h)</li>
+                <li>Inspecionar fonte de soldagem e cabos</li>
+                <li>Substituir cabos danificados</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Limpar ou substituir tungstênio</li>
+                <li>Aumentar fluxo de gás (ex.: 10-20 L/min)</li>
+                <li>Verificar estabilidade da fonte (ex.: usar inversora)</li>
+                <li>Inspecionar tocha por vazamentos</li>
+                <li>Manutenção da fonte de soldagem</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 150-200A)</li>
+                <li>Verificar alimentador de arame (roldanas e guias)</li>
+                <li>Limpar bico da pistola</li>
+                <li>Substituir cabos danificados</li>
+                <li>Inspecionar fonte de soldagem</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Verificar alimentador de arame</li>
+                <li>Aumentar fluxo de gás (FCAW-G, ex.: 20-30 L/min)</li>
+                <li>Limpar bico da pistola</li>
+                <li>Manutenção da fonte de soldagem</li>
+            </ul>
+<h3>10. Respingos Excessivos</h3>
+            <h4>Descrição</h4>
+            <p>Gotas de metal fundido projetadas fora do cordão, dificultando limpeza e estética.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Arco longo</li>
+                <li>Eletrodo úmido</li>
+                <li>Revestimento danificado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Corrente alta</li>
+                <li>Tungstênio contaminado</li>
+                <li>Gás de proteção insuficiente</li>
+                <li>Tocha mal posicionada</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Transferência de metal inadequada (ex.: globular em vez de spray)</li>
+                <li>Distância do bico à peça grande</li>
+                <li>Arame contaminado</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Tensão/corrente alta</li>
+                <li>Técnica inadequada</li>
+                <li>Fluxo de gás insuficiente (FCAW-G)</li>
+                <li>Arame úmido</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Manter arco curto (1-2mm)</li>
+                <li>Ressecar eletrodos (ex.: 200-350°C por 1-2h)</li>
+                <li>Usar eletrodo com revestimento intacto</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Reduzir corrente (ex.: 80-120A para 2mm)</li>
+                <li>Limpar ou substituir tungstênio</li>
+                <li>Aumentar fluxo de gás (ex.: 10-20 L/min)</li>
+                <li>Posicionar tocha a 70-80°</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente para transferência spray (ex.: 24-28V, 180-220A)</li>
+                <li>Manter distância do bico de 10-15mm</li>
+                <li>Usar arame limpo</li>
+                <li>Aplicar spray anti-respingo</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Aumentar fluxo de gás (FCAW-G, ex.: 20-30 L/min)</li>
+                <li>Ressecar arame tubular</li>
+            </ul>
+
+            <h3>11. Instabilidade do Arco</h3>
+            <h4>Descrição</h4>
+            <p>Flutuações ou interrupções no arco elétrico, resultando em cordão irregular.</p>
+            <h4>Processos Afetados</h4>
+            <ul>
+                <li>SMAW (Eletrodo Revestido)</li>
+                <li>GTAW (TIG)</li>
+                <li>GMAW (MIG/MAG)</li>
+                <li>FCAW (Arame Tubular)</li>
+            </ul>
+            <h4>Causas</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Corrente inadequada</li>
+                <li>Arco longo</li>
+                <li>Eletrodo úmido</li>
+                <li>Fonte de soldagem com falha</li>
+                <li>Cabo de soldagem danificado</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Tungstênio contaminado</li>
+                <li>Gás de proteção insuficiente</li>
+                <li>Corrente instável</li>
+                <li>Tocha com vazamentos</li>
+                <li>Fonte de soldagem defeituosa</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Tensão/corrente inadequada</li>
+                <li>Alimentação irregular do arame</li>
+                <li>Bico da pistola sujo</li>
+                <li>Cabo de alimentação danificado</li>
+                <li>Fonte de soldagem instável</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Parâmetros incorretos</li>
+                <li>Alimentação irregular do arame</li>
+                <li>Fluxo de gás insuficiente (FCAW-G)</li>
+                <li>Bico da pistola obstruído</li>
+                <li>Fonte de soldagem com falha</li>
+            </ul>
+            <h4>Soluções</h4>
+            <p><strong>SMAW (Eletrodo Revestido):</strong></p>
+            <ul>
+                <li>Ajustar corrente (ex.: 90-130A para 3.2mm E6013)</li>
+                <li>Manter arco curto (1-2mm)</li>
+                <li>Ressecar eletrodos (ex.: 200-350°C por 1-2h)</li>
+                <li>Inspecionar fonte de soldagem e cabos</li>
+                <li>Substituir cabos danificados</li>
+            </ul>
+            <p><strong>GTAW (TIG):</strong></p>
+            <ul>
+                <li>Limpar ou substituir tungstênio</li>
+                <li>Aumentar fluxo de gás (ex.: 10-20 L/min)</li>
+                <li>Verificar estabilidade da fonte (ex.: usar inversora)</li>
+                <li>Inspecionar tocha por vazamentos</li>
+                <li>Manutenção da fonte de soldagem</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 150-200A)</li>
+                <li>Verificar alimentador de arame (roldanas e guias)</li>
+                <li>Limpar bico da pistola</li>
+                <li>Substituir cabos danificados</li>
+                <li>Inspecionar fonte de soldagem</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Ajustar tensão/corrente (ex.: 22-26V, 120-180A)</li>
+                <li>Verificar alimentador de arame</li>
+                <li>Aumentar fluxo de gás (FCAW-G, ex.: 20-30 L/min)</li>
+                <li>Limpar bico da pistola</li>
+                <li>Manutenção da fonte de soldagem</li>
+            </ul>
+<ul>
+                <li>Usar rampa de corrente no início/fim (ex.: 5-10s)</li>
+                <li>Manter gás de proteção após o fim (ex.: 5-10s)</li>
+                <li>Limpar tungstênio antes de iniciar</li>
+                <li>Controlar poça no início/fim</li>
+            </ul>
+            <p><strong>GMAW (MIG/MAG):</strong></p>
+            <ul>
+                <li>Purgar gás antes de iniciar (ex.: 2-3s)</li>
+                <li>Usar função de queima regressiva (burn-back) no fim</li>
+                <li>Verificar alimentação do arame</li>
+                <li>Limpar bico da pistola</li>
+            </ul>
+            <p><strong>FCAW (Arame Tubular):</strong></p>
+            <ul>
+                <li>Purgar gás antes de iniciar (FCAW-G, ex.: 2-3s)</li>
+                <li>Usar burn-back no fim</li>
+                <li>Manter ângulo de arraste (10-15°)</li>
+                <li>Ressecar arame tubular</li>
+            </ul>
+
+            <h2>Dicas Práticas</h2>
+            <h3>Preparação do Material</h3>
+            <ul>
+                <li>Limpar o metal base com escova de aço inoxidável ou solvente (ex.: acetona) para remover óxido, graxa, ferrugem ou sujeira antes da soldagem.</li>
+                <li>Chanfrar juntas grossas (ex.: chanfro em V a 60° para espessuras >6mm) para garantir penetração completa.</li>
+                <li>Proteger roscas próximas à área soldada com fita resistente ao calor, plugs ou massa de vedação para evitar deformação dos fios.</li>
+                <li>Verificar a composição química do metal base (ex.: SAE 4140 requer E7018 ou E8018-C3) para selecionar o consumível correto.</li>
+                <li>Remover tintas ou revestimentos próximos à junta com lixadeira ou solvente para evitar porosidade.</li>
+            </ul>
+<h3>Seleção e Manuseio de Consumíveis</h3>
+            <ul>
+                <li>Ressecar eletrodos SMAW (ex.: 300-350°C por 2h para E7018, 200-250°C por 1h para E6013) e armazená-los em estufa a 120°C para evitar umidade.</li>
+                <li>Armazenar arames GMAW/FCAW em locais secos (50-70% UR, >15°C) e usar desumidificadores para prevenir oxidação.</li>
+                <li>Usar gás de proteção puro (ex.: argônio 99,99% para GTAW, mistura 75% Ar/25% CO₂ para GMAW) e verificar certificados de qualidade.</li>
+                <li>Inspecionar eletrodos de tungstênio (GTAW) para garantir ponta afiada (ex.: ângulo de 20-30° para aços) e livre de contaminação.</li>
+                <li>Selecionar diâmetro do eletrodo/arame conforme espessura (ex.: 2.5mm para chapas <5mm, 4.0mm para >10mm em SMAW).</li>
+                <li>Evitar eletrodos com revestimento danificado ou arames com ferrugem, que causam instabilidade do arco.</li>
+            </ul>
+            <h3>Controle de Parâmetros</h3>
+            <ul>
+                <li>Ajustar corrente e tensão conforme o diâmetro do consumível (ex.: 90-130A, 22-26V para 3.2mm E6013 em SMAW).</li>
+                <li>Manter distância do bico à peça (10-15mm em GMAW/FCAW) para estabilidade do arco e proteção gasosa.</li>
+                <li>Usar polaridade correta (ex.: CCEN para maior penetração em SMAW, CCEP para maior deposição em GTAW).</li>
+                <li>Controlar velocidade de soldagem para evitar defeitos (ex.: 150-350 mm/min em SMAW, 200-400 mm/min em GMAW).</li>
+                <li>Ajustar fluxo de gás de proteção (ex.: 10-20 L/min para GTAW, 15-25 L/min para GMAW, 20-30 L/min para FCAW-G).</li>
+                <li>Usar rampa de corrente em GTAW (ex.: 5-10s para início/fim) para evitar defeitos de cratera.</li>
+            </ul>
+            <h3>Técnicas de Soldagem</h3>
+            <ul>
+                <li>Manter ângulo correto do eletrodo/pistola (ex.: 10-20° em SMAW, 10-15° de arraste em GMAW/FCAW) para cordão uniforme.</li>
+                <li>Usar técnica de arraste em GMAW/FCAW e técnica de empurrar em GTAW para melhor controle da poça de fusão.</li>
+                <li>Aplicar passes estreitos em juntas espessas (ex.: 2-3mm de largura por passe) para reduzir tensões e melhorar fusão.</li>
+                <li>Controlar temperatura interpassos (ex.: máx. 150°C para aços inoxidáveis duplex, 200°C para aços carbono) para evitar sensibilização ou trincas.</li>
+                <li>Usar sequência alternada de passes (ex.: soldar lados opostos da junta) para minimizar distorção.</li>
+                <li>Preencher crateras no fim da solda (ex.: pausar e retornar em SMAW, usar rampa de corrente em GTAW).</li>
+            </ul>
+            <h3>Manutenção de Equipamentos</h3>
+            <ul>
+                <li>Limpar bicos de pistolas GMAW/FCAW com escova ou spray anti-respingo após cada turno para evitar obstrução do gás.</li>
+                <li>Inspecionar tochas GTAW por vazamentos, desgaste do bico cerâmico ou danos no cabo (substituir se necessário).</li>
+                <li>Verificar fontes de soldagem para estabilidade de corrente/tensão (ex.: calibrar inversoras anualmente).</li>
+                <li>Substituir roldanas e guias do alimentador de arame em GMAW/FCAW quando desgastadas para garantir alimentação uniforme.</li>
+                <li>Inspecionar cabos de soldagem por cortes ou isolamento danificado, substituindo para evitar choques ou instabilidade.</li>
+                <li>Manter reguladores de gás limpos e calibrados, verificando pressão (ex.: 2-3 bar para GMAW) e ausência de vazamentos.</li>
+            </ul>
+            <h3>Segurança</h3>
+            <ul>
+                <li>Usar EPIs completos (máscara de soldagem com filtro DIN 9-13, luvas de couro, avental, botas com biqueira) para proteção contra arco, respingos e fumos.</li>
+                <li>Garantir ventilação adequada ou usar exaustores para evitar inalação de fumos, especialmente em FCAW e GMAW.</li>
+                <li>Proteger áreas inflamáveis com mantas antichamas e manter extintores próximos ao local de soldagem.</li>
+                <li>Evitar contato com peças quentes e usar luvas térmicas ao manusear peças recém-soldadas.</li>
+                <li>Inspecionar equipamentos antes do uso para evitar choques elétricos (ex.: verificar aterramento da fonte).</li>
+                <li>Treinar operadores em segurança conforme normas (ex.: NR-18 no Brasil, OSHA nos EUA).</li>
+            </ul>
+            <h3>Prevenção de Defeitos</h3>
+            <ul>
+                <li>Pré-aquecer aços de alta resistência (ex.: 150-200°C para SAE 4140, 100-150°C para Hardox 400) para evitar trincas a frio.</li>
+                <li>Usar pós-aquecimento (ex.: 200°C por 1h para SAE 4340) para aliviar tensões residuais e remover hidrogênio.</li>
+                <li>Remover escória entre passes em SMAW/FCAW com escova de aço ou picador para evitar inclusões.</li>
+                <li>Testar juntas com ensaios não destrutivos (ex.: ultrassom, radiografia, partículas magnéticas) para detectar defeitos antes do uso.</li>
+                <li>Usar mantas térmicas para controlar resfriamento em aços sensíveis (ex.: aços inoxidáveis duplex, superligas).</li>
+                <li>Evitar soldagem em condições adversas (ex.: vento forte em GMAW/FCAW) usando barreiras ou tendas de proteção.</li>
+            </ul>
+<h3>Soluções para Problemas de Equipamentos e Consumíveis</h3>
+            <ul>
+                <li>Substituir eletrodos úmidos ou com revestimento danificado em SMAW para evitar porosidade e instabilidade do arco.</li>
+                <li>Limpar ou substituir tungstênio contaminado em GTAW (ex.: usar lixa dedicada para evitar contaminação cruzada).</li>
+                <li>Usar arames GMAW/FCAW de fornecedores confiáveis e verificar ausência de ferrugem ou óleo antes do uso.</li>
+                <li>Calibrar fontes de soldagem regularmente para evitar flutuações de corrente/tensão (ex.: verificar com amperímetro).</li>
+                <li>Manter tochas e pistolas refrigeradas (se aplicável) com fluxo de água ou gás adequado para evitar superaquecimento.</li>
+            </ul>
+            <h3>Outras Recomendações</h3>
+            <ul>
+                <li>Qualificar soldadores conforme normas (ex.: AWS D1.1, ASME IX) para posições críticas (ex.: vertical, sobrecabeça).</li>
+                <li>Elaborar EPS (Especificação de Procedimento de Soldagem) para cada junta, especificando parâmetros, consumíveis e técnicas.</li>
+                <li>Usar gabaritos ou grampos para fixar peças e minimizar distorção durante a soldagem.</li>
+                <li>Treinar operadores na leitura de fichas técnicas de consumíveis (ex.: AWS A5.1 para E7018) para seleção correta.</li>
+                <li>Documentar parâmetros de soldagem (ex.: corrente, tensão, velocidade) para rastreabilidade e auditorias.</li>
+                <li>Evitar soldagem em superfícies molhadas ou em chuva, especialmente em SMAW, para prevenir choques e porosidade.</li>
+            </ul>
+        </div>
+
+        <!-- Carregamento dos arquivos JavaScript -->
+        <script src="metal_base.js"></script>
+        <script src="tig.js"></script>
+        <script src="mig.js"></script>
+        <script src="mag.js"></script>
+        <script src="fcaw.js"></script>
+        <script src="smaw.js"></script>
+        <script src="jspdf.umd.min.js"></script>
+
+        <script>
+            // Função para alternar entre seções
+            function showSection(sectionId) {
+                const sections = document.querySelectorAll('.section-content');
+                const navButtons = document.querySelectorAll('nav button');
+
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                navButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+
+                document.getElementById(`${sectionId}-section`).classList.add('active');
+                document.getElementById(`nav-${sectionId}`).classList.add('active');
+            }
+
+            // Função para atualizar a descrição do material e preencher o datalist
+            function updateMaterialDesc() {
+                const material = document.getElementById("materialInput").value;
+                const materialList = document.getElementById("materialList");
+                const descElement = document.getElementById("materialDesc");
+                let desc = "";
+                let found = false;
+
+                // Limpar o datalist
+                materialList.innerHTML = '';
+
+                // Preencher o datalist com os materiais disponíveis
+                for (const materialName in metalBaseData) {
+                    const option = document.createElement("option");
+                    option.value = materialName;
+                    option.setAttribute("data-desc", metalBaseData[materialName]["Descrição"] || "");
+                    materialList.appendChild(option);
+
+                    if (materialName === material) {
+                        desc = metalBaseData[materialName]["Descrição"] || "";
+                        found = true;
+                    }
+                }
+
+                descElement.textContent = desc;
+                if (!found && material) {
+                    descElement.textContent = "Material não encontrado.";
+                }
+                updateConsumables();
+            }
+
+            // Função para formatar composição química em uma linha
+            function formatComposition(composition) {
+                return composition;
+            }
+
+            // Função para determinar a classe de destaque para consumíveis
+            function getConsumableColorClass(index) {
+                return 'consumable-highlight';
+            }
+
+            // Função para formatar objetos aninhados com indentação (recursiva)
+            function formatObject(obj, indentLevel = 0) {
+                let result = '';
+                const indentClass = indentLevel > 0 ? 'class="nested"' : '';
+                let consumableIndex = 0;
+                for (const [key, value] of Object.entries(obj)) {
+                    if (key.toLowerCase().includes("consumíveis compatíveis")) {
+                        continue;
+                    }
+                    if (key === 'Composição Química' || key === 'Composição Química da Alma') {
+                        result += `<p ${indentClass}><strong>${key}:</strong> ${formatComposition(value)}</p>`;
+                    } else if (key === 'Propriedades Mecânicas') {
+                        result += `<p ${indentClass}><strong>${key}:</strong></p>`;
+                        result += formatObject(value, indentLevel + 1);
+                    } else if (key === 'Parâmetros de Soldagem') {
+                        result += `<p ${indentClass}><strong>${key}:</strong></p>`;
+                        result += `<p ${indentClass}><strong>Diâmetro em mm:</strong> ${value["Diâmetro"].join(", ")}</p>`;
+                        if (value["Comprimento Típico"]) {
+                            if (typeof value["Comprimento Típico"] === 'string') {
+                                result += `<p ${indentClass}><strong>Comprimento Típico:</strong> ${value["Comprimento Típico"]}</p>`;
+                            } else if (typeof value["Comprimento Típico"] === 'object') {
+                                result += `<p ${indentClass}><strong>Comprimento Típico (mm):</strong></p>`;
+                                for (const [diameter, length] of Object.entries(value["Comprimento Típico"])) {
+                                    result += `<p class="nested">${diameter}: ${length}</p>`;
+                                }
+                            }
+                        }
+                        result += `<p ${indentClass}><strong>Corrente:</strong> ${value["Corrente"]}</p>`;
+                        result += `<p ${indentClass}><strong>Amperagem bitola (mm) - (A) mínima (A) máxima:</strong></p>`;
+                        for (const [diameter, range] of Object.entries(value["Amperagem"])) {
+                            result += `<p class="nested">${diameter}: ${range}</p>`;
+                        }
+                        result += `<p ${indentClass}><strong>Tensão bitola (mm) - (V) mínima (V) máxima:</strong></p>`;
+                        for (const [diameter, range] of Object.entries(value["Tensão"])) {
+                            result += `<p class="nested">${diameter}: ${range}</p>`;
+                        }
+                        if (value["Velocidade de Alimentação do Arame"]) {
+                            result += `<p ${indentClass}><strong>Velocidade de Alimentação do Arame:</strong></p>`;
+                            for (const [diameter, data] of Object.entries(value["Velocidade de Alimentação do Arame"])) {
+                                result += `<p class="nested">${diameter}: min: ${data.min} max: ${data.max} unidade: ${data.unidade}</p>`;
+                            }
+                        }
+                        const gasProtecaoKey = Object.keys(value).find(k => k.toLowerCase().includes("gás de proteção") || k.toLowerCase().includes("gas de protecao"));
+                        if (gasProtecaoKey) {
+                            result += `<p ${indentClass}><strong>Gás de Proteção:</strong> ${value[gasProtecaoKey]}</p>`;
+                        } else {
+                            console.log("Gás de Proteção não encontrado nos Parâmetros de Soldagem:", value);
+                        }
+                        if (value["Stick-out"]) {
+                            result += `<p ${indentClass}><strong>Stick-out:</strong></p>`;
+                            for (const [diameter, range] of Object.entries(value["Stick-out"])) {
+                                result += `<p class="nested">${diameter}: ${range}</p>`;
+                            }
+                        }
+                        const tipoEletrodoKey = Object.keys(value).find(k => k.toLowerCase().includes("eletrodo de tungstênio") || k.toLowerCase().includes("tipo de eletrodo"));
+                        if (tipoEletrodoKey) {
+                            result += `<p ${indentClass}><strong>Tipo de Eletrodo de Tungstênio:</strong> ${value[tipoEletrodoKey]}</p>`;
+                        } else {
+                            console.log("Tipo de Eletrodo de Tungstênio não encontrado nos Parâmetros de Soldagem:", value);
+                        }
+                        const anguloAfiacaokey = Object.keys(value).find(k => k.toLowerCase().includes("ângulo de afiação") || k.toLowerCase().includes("angulo de afiacao"));
+                        if (anguloAfiacaokey) {
+                            result += `<p ${indentClass}><strong>Ângulo de Afiação:</strong> ${value[anguloAfiacaokey]}</p>`;
+                        } else {
+                            console.log("Ângulo de Afiação não encontrado nos Parâmetros de Soldagem:", value);
+                        }
+                    } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                        result += `<p ${indentClass}><strong>${key}:</strong></p>`;
+                        result += formatObject(value, indentLevel + 1);
+                    } else if (Array.isArray(value)) {
+                        result += `<p ${indentClass}><strong>${key}:</strong> ${value.join(", ")}</p>`;
+                    } else {
+                        if (key.toLowerCase().includes("consumível")) {
+                            const colorClass = getConsumableColorClass(consumableIndex);
+                            result += `<p ${indentClass}><strong>${key}:</strong> <span class="${colorClass}">${value}</span></p>`;
+                            consumableIndex++;
+                        } else {
+                            result += `<p ${indentClass}><strong>${key}:</strong> ${value}</p>`;
+                        }
+                    }
+                }
+                return result;
+            }
+
+            // Função para extrair a série de um material (ex.: "AA 1108" -> "AA 1XXX")
+            function getMaterialSeries(material) {
+                if (material.startsWith("AA ")) {
+                    const seriesNumber = material.slice(3, 4);
+                    return `AA ${seriesNumber}XXX`;
+                }
+                return material.toUpperCase();
+            }
+
+            // Função para obter consumíveis compatíveis
+            function getConsumables(material, process) {
+                const processData = {
+                    TIG: tigData,
+                    MIG: migData,
+                    MAG: magData,
+                    FCAW: fcawData,
+                    SMAW: smawData
+                };
+
+                const consumables = processData[process] ? processData[process][process] : {};
+                if (!consumables || typeof consumables !== 'object') {
+                    console.warn(`Nenhum consumível disponível para o processo ${process}.`);
+                    return [];
+                }
+                console.log(`Verificando consumíveis para material ${material} no processo ${process}`);
+                console.log(`Consumíveis disponíveis para ${process}:`, Object.keys(consumables));
+                const compatibleConsumables = [];
+                const materialUpper = material.toUpperCase();
+                const materialSeries = getMaterialSeries(material);
+                for (const consumableKey in consumables) {
+                    const consumable = consumables[consumableKey];
+                    if (!consumable || !consumable["Materiais Base Compatíveis"]) {
+                        console.warn(`Consumível ${consumableKey} está mal formatado ou não possui Materiais Base Compatíveis.`);
+                        continue;
+                    }
+                    const compatibleMaterials = consumable["Materiais Base Compatíveis"].map(m => m.toUpperCase());
+                    const compatibleSeries = consumable["Materiais Base Compatíveis"].map(m => getMaterialSeries(m));
+                    console.log(`Consumível ${consumableKey}: Materiais compatíveis: ${compatibleMaterials}, Séries compatíveis: ${compatibleSeries}`);
+                    if (compatibleMaterials.includes(materialUpper) || compatibleSeries.includes(materialSeries)) {
+                        compatibleConsumables.push({ key: consumableKey, data: consumable });
+                    }
+                }
+                console.log(`Consumíveis compatíveis para ${material} no processo ${process}:`, compatibleConsumables);
+                return compatibleConsumables;
+            }
+
+            // Função para gerar a lista de consumíveis compatíveis para todos os processos
+            function generateCompatiblesList(material) {
+                const processes = ['TIG', 'MIG', 'MAG', 'FCAW', 'SMAW'];
+                let compatiblesHtml = '<div class="section" id="compatibles-section">';
+                compatiblesHtml += '<h2>Consumíveis Compatíveis</h2>';
+                compatiblesHtml += '<hr>';
+                processes.forEach(proc => {
+                    const compatibles = material ? getConsumables(material, proc) : [];
+                    const consumablesList = compatibles.length > 0
+                        ? compatibles.map(c => c.key).join(", ")
+                        : "Nenhum";
+                    compatiblesHtml += `<p><strong>${proc}:</strong> ${consumablesList}</p>`;
+                });
+                compatiblesHtml += '</div>';
+                return compatiblesHtml;
+            }
+
+            // Função para atualizar o dropdown de consumíveis
+            function updateConsumables() {
+                const material = document.getElementById("materialInput").value;
+                const process = document.getElementById("process").value;
+                const consumableSelection = document.getElementById("consumableSelection");
+                const consumableSelect = document.getElementById("consumableSelect");
+                const resultsDiv = document.getElementById("results");
+
+                consumableSelection.style.display = "none";
+                consumableSelect.innerHTML = '<option value="">Selecione um consumível...</option>';
+                resultsDiv.innerHTML = "";
+
+                if (!material || !metalBaseData[material]) return;
+
+                resultsDiv.innerHTML = generateCompatiblesList(material);
+
+                if (!process) return;
+
+                const consumables = getConsumables(material, process);
+                if (consumables.length === 0) {
+                    resultsDiv.innerHTML += `<p style="color: #dc3545;">Nenhum consumível compatível encontrado para ${material} no processo ${process}. Este material pode não ser adequado para este processo.</p>`;
+                    return;
+                }
+
+                // Garantir que a lista de consumíveis não tenha duplicatas
+                const uniqueConsumables = Array.from(new Set(consumables.map(c => c.key))).map(key => consumables.find(c => c.key === key));
+                console.log("Consumíveis únicos:", uniqueConsumables);
+
+                if (uniqueConsumables.length === 1) {
+                    const option = document.createElement("option");
+                    option.value = uniqueConsumables[0].key;
+                    option.textContent = uniqueConsumables[0].key;
+                    consumableSelect.appendChild(option);
+                    consumableSelect.value = uniqueConsumables[0].key;
+                    resultsDiv.innerHTML += `<p style="color: #28a745;">Consumível ${uniqueConsumables[0].key} selecionado automaticamente (única opção compatível).</p>`;
+                } else {
+                    consumableSelection.style.display = "block";
+                    uniqueConsumables.forEach(consumable => {
+                        const option = document.createElement("option");
+                        option.value = consumable.key;
+                        option.textContent = consumable.key;
+                        consumableSelect.appendChild(option);
+                    });
+                    resultsDiv.innerHTML += `<p style="color: #17a2b8;">Selecione um consumível compatível da lista acima.</p>`;
+                }
+                updateButtonState();
+            }
+
+            // Função para atualizar o estado do botão "Gerar Dados"
+            function updateButtonState() {
+                const material = document.getElementById("materialInput").value;
+                const process = document.getElementById("process").value;
+                const generateButton = document.querySelector("button.generate");
+                const pdfButton = document.querySelector("button.pdf");
+                generateButton.disabled = !material || !process || !metalBaseData[material];
+                pdfButton.disabled = !material || !process || !metalBaseData[material];
+            }
+
+            // Função para limpar seleções
+            function clearSelections() {
+                const materialInput = document.getElementById("materialInput");
+                const processSelect = document.getElementById("process");
+                const consumableSelect = document.getElementById("consumableSelect");
+                const consumableSelection = document.getElementById("consumableSelection");
+                const resultsDiv = document.getElementById("results");
+                const descElement = document.getElementById("materialDesc");
+
+                materialInput.value = "";
+                processSelect.value = "";
+                consumableSelection.style.display = "none";
+                consumableSelect.innerHTML = '<option value="">Selecione um consumível...</option>';
+                resultsDiv.innerHTML = "";
+                descElement.textContent = "";
+                updateButtonState();
+            }
+
+            // Função para converter HTML para texto simples (removendo tags e mantendo a estrutura)
+            function htmlToText(html) {
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = html;
+                return tempDiv.textContent || tempDiv.innerText || "";
+            }
+
+            // Função para gerar a folha de dados
+            function generateData() {
+                const material = document.getElementById("materialInput").value;
+                const process = document.getElementById("process").value;
+                const consumableSelect = document.getElementById("consumableSelect");
+                const resultsDiv = document.getElementById("results");
+                resultsDiv.innerHTML = '';
+
+                if (!material || !metalBaseData[material] || !process) {
+                    resultsDiv.innerHTML = '<p style="color: #dc3545;">Selecione um material base e um processo de soldagem válidos.</p>';
+                    return;
+                }
+
+                const consumables = getConsumables(material, process);
+                if (consumables.length === 0) {
+                    resultsDiv.innerHTML = generateCompatiblesList(material);
+                    resultsDiv.innerHTML += `<p style="color: #dc3545;">Nenhum consumível compatível encontrado para ${material} no processo ${process}. Este material pode não ser adequado para este processo.</p>`;
+                    return;
+                }
+
+                let consumableKeyToDisplay;
+                if (consumables.length === 1) {
+                    consumableKeyToDisplay = consumables[0].key;
+                } else {
+                    consumableKeyToDisplay = consumableSelect.value;
+                    if (!consumableKeyToDisplay) {
+                        resultsDiv.innerHTML = generateCompatiblesList(material);
+                        resultsDiv.innerHTML += `<p style="color: #dc3545;">Selecione um consumível.</p>`;
+                        return;
+                    }
+                }
+
+                // Construir as seções separadamente
+                const materialData = metalBaseData[material];
+                let materialHtml = '<div class="section" id="material-section">';
+                materialHtml += `<h2>Dados do Material Base: ${material}</h2>`;
+                materialHtml += '<hr>';
+                materialHtml += formatObject(materialData);
+                materialHtml += '</div>';
+
+                let compatiblesHtml = generateCompatiblesList(material);
+
+                // Construir a seção do consumível
+                let consumablesHtml = '';
+                const selectedConsumable = consumables.find(c => c.key === consumableKeyToDisplay);
+                if (selectedConsumable) {
+                    consumablesHtml = '<div class="section consumable-section">';
+                    consumablesHtml += `<h2>Consumível Selecionado (${process})</h2>`;
+                    consumablesHtml += '<hr>';
+                    // Evitar duplicação interna ao formatar o objeto
+                    const formattedConsumable = formatObject(selectedConsumable.data);
+                    consumablesHtml += `<div class="section">${formattedConsumable}</div>`;
+                    consumablesHtml += '</div>';
+                } else {
+                    consumablesHtml = `<p>Consumível ${consumableKeyToDisplay} não encontrado.</p>`;
+                }
+
+                // Adicionar as seções ao resultsDiv
+                resultsDiv.innerHTML = materialHtml + compatiblesHtml + consumablesHtml;
+
+                // Log para depuração
+                console.log("HTML gerado:", resultsDiv.innerHTML);
+                console.log("Quantidade de seções 'consumable-section':", resultsDiv.querySelectorAll('.consumable-section').length);
+
+                updateButtonState();
+            }
+
+            // Função para gerar PDF com os resultados
+            function generatePDF() {
+                const resultsDiv = document.getElementById("results");
+                if (!resultsDiv.innerHTML) {
+                    alert("Nenhum resultado para gerar PDF.");
+                    return;
+                }
+
+                try {
+                    // Verificar se o jsPDF está disponível
+                    if (!window.jspdf || !window.jspdf.jsPDF) {
+                        console.error("Erro: Biblioteca jsPDF não foi carregada corretamente. Verifique se o arquivo jspdf.umd.min.js está presente e foi carregado.");
+                        alert("Erro: Não foi possível gerar o PDF. A biblioteca jsPDF não foi carregada corretamente.");
+                        return;
+                    }
+
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
+                    // Configurações iniciais do PDF
+                    let yPosition = 15;
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const margin = 15;
+                    const maxWidth = pageWidth - 2 * margin;
+                    const lineHeight = 6;
+
+                    // Cabeçalho do relatório
+                    doc.setFontSize(16);
+                    doc.setTextColor(44, 62, 80); // Cor #2c3e50
+                    doc.text("Relatório de Sistema de Processos de Soldagem", pageWidth / 2, yPosition, { align: 'center' });
+                    yPosition += 5;
+
+                    // Data de geração
+                    const today = new Date();
+                    const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+                    doc.setFontSize(10);
+                    doc.setTextColor(74, 89, 105); // Cor #4a5969
+                    doc.text(`Gerado em: ${dateStr}`, pageWidth - margin, yPosition, { align: 'right' });
+                    yPosition += 10;
+
+                    // Função para adicionar texto com verificação de página
+                    function addText(text, x, y, fontSize, color, isBold = false) {
+                        // Normalizar caracteres especiais para evitar problemas de codificação
+                        text = String(text).normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+                        doc.setFontSize(fontSize);
+                        doc.setTextColor(...color);
+                        doc.setFont("Helvetica", isBold ? "bold" : "normal");
+                        const lines = doc.splitTextToSize(text, maxWidth);
+                        for (let i = 0; i < lines.length; i++) {
+                            if (y + lineHeight > doc.internal.pageSize.getHeight() - margin) {
+                                doc.addPage();
+                                y = 15;
+                            }
+                            doc.text(lines[i], x, y);
+                            y += lineHeight;
+                        }
+                        return y;
+                    }
+
+                    // Processar as seções do HTML e adicionar ao PDF
+                    const sections = Array.from(resultsDiv.querySelectorAll('.section'));
+                    const processedSections = new Set();
+
+                    sections.forEach(section => {
+                        const h2 = section.querySelector('h2');
+                        if (h2) {
+                            const sectionTitle = htmlToText(h2.innerHTML);
+                            // Evitar processar seções duplicadas com base no título
+                            if (processedSections.has(sectionTitle)) {
+                                console.log(`Seção duplicada ignorada: ${sectionTitle}`);
+                                return; // Pula seções duplicadas
+                            }
+                            processedSections.add(sectionTitle);
+                            console.log(`Processando seção: ${sectionTitle}`);
+
+                            yPosition = addText(sectionTitle, margin, yPosition, 14, [44, 62, 80], true); // Cor #2c3e50
+                            yPosition += 2;
+                        }
+
+                        const paragraphs = section.querySelectorAll('p');
+                        paragraphs.forEach(p => {
+                            const text = htmlToText(p.innerHTML);
+                            const isNested = p.classList.contains('nested');
+                            const indent = isNested ? margin + 5 : margin;
+                            const isBold = !!p.querySelector('strong');
+                            yPosition = addText(text, indent, yPosition, 10, [74, 89, 105], isBold); // Cor #4a5969
+                        });
+
+                        // Adicionar uma linha horizontal após cada seção
+                        if (yPosition + 10 > doc.internal.pageSize.getHeight() - margin) {
+                            doc.addPage();
+                            yPosition = 15;
+                        }
+                        doc.setDrawColor(226, 232, 240); // Cor #e2e8f0
+                        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+                        yPosition += 5;
+                    });
+
+                    // Salvar o PDF
+                    doc.save('soldagem_resultados.pdf');
+                } catch (error) {
+                    console.error("Erro ao gerar PDF:", error);
+                    alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.");
+                }
+            }
+
+            // Inicializar a página e adicionar event listeners
+            window.onload = function() {
+                updateMaterialDesc();
+                updateButtonState();
+
+                // Adicionar listeners para os botões do menu
+                document.getElementById('nav-metals').addEventListener('click', () => showSection('metals'));
+                document.getElementById('nav-positions').addEventListener('click', () => showSection('positions'));
+                document.getElementById('nav-symbols').addEventListener('click', () => showSection('symbols'));
+                document.getElementById('nav-transfer-methods').addEventListener('click', () => showSection('transfer-methods'));
+                document.getElementById('nav-defects').addEventListener('click', () => showSection('defects'));
+
+                // Adicionar listeners para os elementos interativos
+                document.getElementById('materialInput').addEventListener('input', updateMaterialDesc);
+                document.getElementById('process').addEventListener('change', updateConsumables);
+                document.getElementById('generateBtn').addEventListener('click', generateData);
+                document.getElementById('clearBtn').addEventListener('click', clearSelections);
+                document.getElementById('pdfBtn').addEventListener('click', generatePDF);
+            };
+        </script>
+        <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9367334f2a8bb054',t:'MTc0NTY4MjI1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+        <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'936fdc460cb053c4',t:'MTc0NTc3MzA2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    </div>
+</body>
+</html>
